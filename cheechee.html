@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Train Scheduler</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/flatly/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/cheechee.css">
+</head>
+
+<body>
+    <div id="container">
+        <div class="jumbotron">
+            <h1>Anytime is Train Time</h1>
+            <h2>Check the Train Schedule!</h2>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <br>
+                <div class="panel panel-primary">
+                    <!--Heading of panel-->
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><strong><i class="fa fa-table"></i>Current Train Schedule</strong></h3>
+                    </div>
+                    <div class="panel-body" id="well-section">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <table id="train">
+                                    <tr>
+                                        <td><strong>Train Name</strong></td>
+                                        <td><strong>Destination</strong></td>
+                                        <td><strong>Frequency (min)</strong></td>
+                                        <td><strong>Next Arrival</strong></td>
+                                        <td><strong>Minutes Away</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <br>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><strong><i class="fa  fa-list-alt"></i>Add Train</strong></h3>
+                </div>
+                <div class="panel-body">
+                    <form id="form">
+                        <div class="form-group">
+                            <label id="search">Train Name</label>
+                            <input type="text" class="form-control" id="train-name">
+                        </div>
+                        <div class="form-group">
+                            <label id="destination">Destination</label>
+                            <input type="text" class="form-control" id="destination-input">
+                        </div>
+                        <div class="form-group">
+                            <label id="start-time">First Train Time (HH:mm - military time)</label>
+                            <input type="text" class="form-control" id="start-time-input">
+                        </div>
+                        <div class="form-group">
+                            <label id="frequency">Frequency (min)</label>
+                            <input type="text" class="form-control" id="frequency-input">
+                        </div>
+                        <button type="submit" class="btn btn-default" id="run-search"><i class="fa fa-search"></i> Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.1.1/firebase.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <script type="text/javascript">
+    var config = {
+        apiKey: "AIzaSyC7k5orn72raCsECSpgRKxDPadMmaqJ1-E",
+        authDomain: "fir-recent-user-push-4a3ad.firebaseapp.com",
+        databaseURL: "https://employee-classwork.firebaseio.com",
+        projectId: "fir-recent-user-push-4a3ad",
+        storageBucket: "fir-recent-user-push-4a3ad.appspot.com",
+        messagingSenderId: "572750486144"
+    };
+
+    firebase.initializeApp(config);
+
+    var database = firebase.database();
+
+    var name = "";
+    var destination = "";
+    var time = "";
+    var frequency = "";
+
+
+    $("#run-search").on("click", function(event) {
+        event.preventDefault();
+
+
+        name = $("#train-name").val().trim();
+        destination = $("#destination-input").val().trim();
+        time = $("#start-time-input").val().trim();
+        frequency = $("#frequency-input").val().trim();
+
+        console.log(name);
+
+        database.ref().push({
+            name: name,
+            destination: destination,
+            time: time,
+            frequency: frequency
+        });
+
+    });
+
+    database.ref().on("child_added", function(childSnapshot) {
+        // console.log(childSnapshot.val());
+        console.log(childSnapshot.val().name);
+        console.log(childSnapshot.val().destination);
+        console.log(childSnapshot.val().time);
+        console.log(childSnapshot.val().frequency);
+
+
+        var nextArrival = moment().diff(childSnapshot.val().start, "nextArrival");
+
+
+        $("#train").append("<tr><td>" + childSnapshot.val().name +
+            " </td><td>" + childSnapshot.val().destination +
+            " </td><td> " + childSnapshot.val().time +
+            " </td><td> " + nextArrival +
+            " </td><td> " + childSnapshot.val().frequency + "</td></tr>");
+    })
+    </script>
+</body>
